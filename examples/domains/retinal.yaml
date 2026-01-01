@@ -1,0 +1,66 @@
+# Example custom domain for retinal imaging
+# This shows how to define domain-specific constraints
+
+name: retinal
+description: Retinal fundus imaging with vessel and lesion preservation
+
+constraints:
+  # Forbidden - these can damage retinal structure
+  - transform_name: ElasticTransform
+    level: forbidden
+    reason: Can distort blood vessel structures and lesion shapes
+    
+  - transform_name: GridDistortion
+    level: forbidden
+    reason: Breaks the natural vascular patterns
+    
+  - transform_name: Perspective
+    level: forbidden
+    reason: Retinal images are flat projections, perspective is not valid
+
+  # Discouraged - use with caution
+  - transform_name: GaussianBlur
+    level: discouraged
+    reason: Can obscure fine vessel details and microaneurysms
+    parameter_limits:
+      blur_limit: [3, 5]
+      
+  - transform_name: MotionBlur
+    level: discouraged
+    reason: Simulates poor focus, may hide small lesions
+    
+  # Recommended with safe parameters
+  - transform_name: Rotate
+    level: recommended
+    reason: Rotation is valid for fundus images
+    parameter_limits:
+      limit: [-180, 180]
+      
+  - transform_name: RandomBrightnessContrast
+    level: recommended
+    reason: Simulates different camera settings and illumination
+    parameter_limits:
+      brightness_limit: [0.0, 0.2]
+      contrast_limit: [0.0, 0.2]
+      
+  - transform_name: HueSaturationValue
+    level: recommended
+    reason: Simulates color variation between cameras
+    parameter_limits:
+      hue_shift_limit: [0, 15]
+      sat_shift_limit: [0, 20]
+      val_shift_limit: [0, 15]
+
+  - transform_name: GaussNoise
+    level: recommended
+    reason: Simulates sensor noise
+    parameter_limits:
+      var_limit: [0.0, 0.02]
+
+recommended_transforms:
+  - HorizontalFlip
+  - VerticalFlip
+  - Rotate
+  - RandomBrightnessContrast
+  - CLAHE  # Good for enhancing vessel visibility
+  - GaussNoise
