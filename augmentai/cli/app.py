@@ -6,6 +6,7 @@ Provides commands for:
 - Validating existing policies
 - Listing available domains
 - Exporting policies to different formats
+- One-command dataset preparation
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 
 from augmentai.core.config import AugmentAIConfig, LLMProvider, AugmentationBackend
+from augmentai.cli.prepare import prepare as prepare_command
 
 app = typer.Typer(
     name="augmentai",
@@ -26,6 +28,9 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+
+# Register the prepare command
+app.command()(prepare_command)
 
 
 @app.command()
