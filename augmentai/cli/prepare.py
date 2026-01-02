@@ -1,7 +1,7 @@
 """
 One-command data preparation CLI.
 
-Orchestrates: inspect → split → augment policy → export
+Orchestrates: lint → inspect → split → augment policy → export
 
 Usage:
     augmentai prepare ./dataset --domain medical --task "segmentation"
@@ -24,6 +24,8 @@ from augmentai.core.pipeline import PipelineConfig, PipelineResult
 from augmentai.core.policy import Policy, Transform
 from augmentai.domains import get_domain
 from augmentai.inspection import DatasetAnalyzer
+from augmentai.linting import DatasetLinter, LintSeverity
+from augmentai.preview import AugmentationPreview, PreviewConfig
 from augmentai.splitting import DatasetSplitter, SplitStrategy, SplitResult
 from augmentai.splitting.strategies import SplitConfig
 from augmentai.export import ScriptGenerator, FolderStructure
@@ -81,42 +83,89 @@ def prepare(
         "--skip-split",
         help="Skip splitting if dataset is already split",
     ),
+    skip_lint: bool = typer.Option(
+        False,
+        "--skip-lint",
+        help="Skip dataset linting checks",
+    ),
+    lint_only: bool = typer.Option(
+        False,
+        "--lint-only",
+        help="Only run linting, then exit",
+    ),
+    preview: bool = typer.Option(
+        False,
+        "--preview",
+        help="Generate visual preview of augmentations",
+    ),
+    preview_count: int = typer.Option(
+        5,
+        "--preview-count",
+        help="Number of sample images for preview",
+    ),
 ) -> None:
+
     """
     Prepare a dataset for training with one command.
     
-    Inspects the dataset, splits it, generates an augmentation policy,
+    Lints the dataset, inspects it, splits it, generates an augmentation policy,
     and exports executable scripts.
     
     Examples:
         augmentai prepare ./images --domain medical
         augmentai prepare ./data --domain auto --task "classification"
         augmentai prepare ./dataset --split 70/15/15 --seed 123
+        augmentai prepare ./dataset --lint-only
     """
     console.print(Panel.fit(
         "[bold blue]AugmentAI[/bold blue] - One-Command Data Preparation",
-        subtitle="inspect → split → policy → export"
+        subtitle="lint → inspect → split → policy → export"
     ))
     
-    # Parse split ratios
-    try:
-        train_ratio, val_ratio, test_ratio = _parse_split(split)
-    except ValueError as e:
-        console.print(f"[red]Error:[/red] {e}")
-        raise typer.Exit(1)
-    
-    # Parse strategy
-    try:
-        split_strategy = SplitStrategy(strategy)
-    except ValueError:
-        console.print(f"[red]Error:[/red] Invalid strategy '{strategy}'. Use: random, stratified, group")
-        raise typer.Exit(1)
+    # Parse split ratios (not needed if lint_only)
+    if not lint_only:
+        try:
+            train_ratio, val_ratio, test_ratio = _parse_split(split)
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(1)
+        
+        # Parse strategy
+        try:
+            split_strategy = SplitStrategy(strategy)
+        except ValueError:
+            console.print(f"[red]Error:[/red] Invalid strategy '{strategy}'. Use: random, stratified, group")
+            raise typer.Exit(1)
     
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
+        
+        # Step 0: Lint dataset (unless skipped)
+        if not skip_lint:
+            task_id = progress.add_task("Linting dataset...", total=None)
+            linter = DatasetLinter()
+            lint_report = linter.lint(dataset, domain=domain if domain != "auto" else None)
+            progress.update(task_id, completed=True)
+            
+            # Display lint results
+            lint_report.display(console)
+            
+            # Check for critical errors
+            if not lint_report.passed:
+                console.print("\n[red bold]✗ Linting failed with errors.[/red bold]")
+                console.print("[dim]Use --skip-lint to bypass linting checks.[/dim]")
+                raise typer.Exit(1)
+            
+            # If lint-only mode, exit here
+            if lint_only:
+                console.print("\n[green]Linting complete.[/green]")
+                raise typer.Exit(0)
+        elif lint_only:
+            console.print("[yellow]Cannot use --lint-only with --skip-lint[/yellow]")
+            raise typer.Exit(1)
         
         # Step 1: Inspect dataset
         task_id = progress.add_task("Inspecting dataset...", total=None)
@@ -183,7 +232,33 @@ def prepare(
         progress.update(task_id, completed=True)
         _show_policy(policy, enforcement)
         
-        # Step 4: Export scripts and configs
+        # Step 4: Generate preview (if requested)
+        if preview:
+            progress.update(task_id, description="Generating augmentation preview...")
+            
+            # Collect sample images from dataset
+            sample_images = _collect_sample_images(dataset, preview_count)
+            
+            if sample_images:
+                preview_config = PreviewConfig(
+                    n_samples=preview_count,
+                    n_variations=2,
+                    seed=seed,
+                )
+                previewer = AugmentationPreview(output, preview_config)
+                results = previewer.generate_samples(sample_images, policy)
+                
+                # Generate reports
+                html_path = previewer.generate_html_report(results, policy)
+                json_path = previewer.generate_json_report(results, policy)
+                
+                progress.update(task_id, completed=True)
+                console.print(f"[green]✓[/green] Preview generated: {len(results)} samples")
+                console.print(f"  [dim]HTML report: {html_path}[/dim]")
+            else:
+                console.print("[yellow]⚠ No images found for preview[/yellow]")
+        
+        # Step 5: Export scripts and configs
         if not dry_run:
             progress.update(task_id, description="Exporting scripts...")
             
@@ -253,6 +328,20 @@ def _parse_split(split_str: str) -> tuple[float, float, float]:
     # Normalize to ratios
     ratios = [v / total for v in values]
     return ratios[0], ratios[1], ratios[2]
+
+
+def _collect_sample_images(dataset: Path, count: int) -> list[Path]:
+    """Collect sample images from dataset for preview."""
+    image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp"}
+    images = []
+    
+    for ext in image_extensions:
+        images.extend(dataset.rglob(f"*{ext}"))
+        images.extend(dataset.rglob(f"*{ext.upper()}"))
+    
+    # Sort for consistency and return limited count
+    return sorted(images)[:count]
+
 
 
 def _show_inspection_results(report) -> None:
