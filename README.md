@@ -332,13 +332,62 @@ Load with:
 augmentai chat --domain-file my_domain.yaml
 ```
 
-## 🗺️ Roadmap
+## 🗺️ Extended Roadmap
 
-- [ ] Kaggle notebook templates and integration guide
-- [ ] Additional backends: Kornia, MONAI, torchvision
-- [ ] LLM-driven policy suggestions in `prepare` command
-- [ ] Web UI for policy design
-- [ ] Dataset versioning integration (DVC)
+### Near Term (v0.2 – v0.3): Make AugmentAI Trustworthy at Scale
+
+*Focus: Data correctness & confidence*
+
+- [x] **Dataset Linter (Pre-Prepare)** ✅
+  - Detect duplicates, corrupt images, mismatched masks
+  - Warn about class imbalance and label leakage
+  - Runs automatically before prepare (`--skip-lint`, `--lint-only`)
+
+- [x] **Augmentation Safety Validator** ✅
+  - Test augmentation–label consistency
+  - Flag transforms that break segmentation masks or OCR legibility
+  - Critical for medical & OCR domains
+
+- [x] **Augmentation Preview & Diff** ✅
+  - Visual before/after samples
+  - Show what changed per transform
+  - HTML/JSON dry-run reports (`--preview`, `--preview-count`)
+
+
+### Mid Term (v0.4 – v0.5): Make AugmentAI Evidence-Driven
+
+*Focus: Prove augmentations help*
+
+- [x] **Automatic Augmentation Ablation** ✅
+  - Measure contribution of each transform
+  - Rank augmentations by validation impact
+  - Export ablation reports (`augmentai ablate`)
+
+- [x] **Augmentation-Aware Robustness Metrics** ✅
+  - Evaluate model sensitivity per augmentation
+  - Identify fragile invariances early
+
+- [x] **Policy Comparison & Versioning** ✅
+  - Diff augmentation policies
+  - Track changes across experiments
+  - Integrate with DVC / dataset manifests (`augmentai diff`)
+
+
+### Long Term (v0.6+): Close the Data–Model Loop
+
+*Focus: Data-centric learning*
+
+- [ ] **Model-Guided Data Repair**
+  - Use uncertainty to suggest relabel / reweight / remove samples
+  - Feedback loop from trained model to data prep
+
+- [ ] **Curriculum-Aware Dataset Preparation**
+  - Order data from easy → hard
+  - Adaptive augmentation strength over epochs
+
+- [ ] **Domain Shift Simulation**
+  - Generate controlled distribution shifts
+  - Stress-test generalization before deployment
 
 ## 🤝 Contributing
 
