@@ -21,6 +21,8 @@ from rich.markdown import Markdown
 
 from augmentai.core.config import AugmentAIConfig, LLMProvider, AugmentationBackend
 from augmentai.cli.prepare import prepare as prepare_command
+from augmentai.cli.ablate import ablate as ablate_command
+from augmentai.cli.diff import diff as diff_command
 
 app = typer.Typer(
     name="augmentai",
@@ -29,8 +31,11 @@ app = typer.Typer(
 )
 console = Console()
 
-# Register the prepare command
+# Register commands
 app.command()(prepare_command)
+app.command()(ablate_command)
+app.command()(diff_command)
+
 
 
 @app.command()

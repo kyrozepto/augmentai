@@ -358,19 +358,20 @@ augmentai chat --domain-file my_domain.yaml
 
 *Focus: Prove augmentations help*
 
-- [ ] **Automatic Augmentation Ablation**
+- [x] **Automatic Augmentation Ablation** ✅
   - Measure contribution of each transform
   - Rank augmentations by validation impact
-  - Export ablation reports
+  - Export ablation reports (`augmentai ablate`)
 
-- [ ] **Augmentation-Aware Robustness Metrics**
+- [x] **Augmentation-Aware Robustness Metrics** ✅
   - Evaluate model sensitivity per augmentation
   - Identify fragile invariances early
 
-- [ ] **Policy Comparison & Versioning**
+- [x] **Policy Comparison & Versioning** ✅
   - Diff augmentation policies
   - Track changes across experiments
-  - Integrate with DVC / dataset manifests
+  - Integrate with DVC / dataset manifests (`augmentai diff`)
+
 
 ### Long Term (v0.6+): Close the Data–Model Loop
 
