@@ -23,6 +23,9 @@ from augmentai.core.config import AugmentAIConfig, LLMProvider, AugmentationBack
 from augmentai.cli.prepare import prepare as prepare_command
 from augmentai.cli.ablate import ablate as ablate_command
 from augmentai.cli.diff import diff as diff_command
+from augmentai.cli.repair import repair as repair_command
+from augmentai.cli.curriculum import curriculum as curriculum_command
+from augmentai.cli.shift import shift as shift_command
 
 app = typer.Typer(
     name="augmentai",
@@ -35,6 +38,9 @@ console = Console()
 app.command()(prepare_command)
 app.command()(ablate_command)
 app.command()(diff_command)
+app.command()(repair_command)
+app.command()(curriculum_command)
+app.command()(shift_command)
 
 
 

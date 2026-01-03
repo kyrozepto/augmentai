@@ -377,17 +377,20 @@ augmentai chat --domain-file my_domain.yaml
 
 *Focus: Data-centric learning*
 
-- [ ] **Model-Guided Data Repair**
+- [x] **Model-Guided Data Repair** ✅
   - Use uncertainty to suggest relabel / reweight / remove samples
   - Feedback loop from trained model to data prep
+  - CLI: `augmentai repair ./dataset --eval-script repair_eval.py`
 
-- [ ] **Curriculum-Aware Dataset Preparation**
+- [x] **Curriculum-Aware Dataset Preparation** ✅
   - Order data from easy → hard
   - Adaptive augmentation strength over epochs
+  - CLI: `augmentai curriculum ./dataset --epochs 100 --pacing quadratic`
 
-- [ ] **Domain Shift Simulation**
+- [x] **Domain Shift Simulation** ✅
   - Generate controlled distribution shifts
   - Stress-test generalization before deployment
+  - CLI: `augmentai shift ./dataset --shifts brightness,blur,noise`
 
 ## 🤝 Contributing
 
