@@ -12,12 +12,14 @@ Design domain-safe, task-aware augmentation policies through natural language co
 ## 🌟 Features
 
 - **One-Command Preparation**: `augmentai prepare ./dataset` - inspect, split, augment, export
+- **🆕 AutoSearch**: `augmentai search ./dataset` - find optimal policies automatically
 - **Natural Language Interface**: Describe your dataset in plain English
 - **Domain-Aware Constraints**: Built-in rules for medical, OCR, satellite, and natural images
 - **Safety-First Design**: Hard constraints that prevent scientifically invalid augmentations
 - **Full Reproducibility**: Seed locking, manifest tracking, deterministic pipelines
 - **LLM as Advisor**: GPT-4o-mini, Ollama, or LM Studio—LLM suggests, rules validate
 - **Executable Output**: Generate standalone Python scripts ready to run
+- **Verbose/Quiet Modes**: `--verbose` for debugging, `--quiet` for CI/CD pipelines
 
 ## 🚀 Quick Start
 
@@ -70,6 +72,21 @@ augmentai domains
 # Validate an existing policy
 augmentai validate my_policy.yaml --domain medical
 ```
+
+### 🔍 AutoSearch: Find Optimal Policies Automatically
+
+```bash
+# Search for best policy (uses evolutionary optimization)
+augmentai search ./dataset --domain medical --budget 50
+
+# With custom output directory
+augmentai search ./images --budget 100 --output ./search_results
+
+# Preview search configuration
+augmentai search ./data --dry-run
+```
+
+AutoSearch uses proxy metrics (diversity, coverage, strength, balance) to score policies without requiring full model training.
 
 ## � Output Structure
 
@@ -277,7 +294,7 @@ AugmentAI enforces **hard constraints** that cannot be overridden:
 
 ```
 augmentai/
-├── cli/              # CLI commands (prepare, chat, validate)
+├── cli/              # CLI commands (prepare, chat, validate, search)
 ├── core/             # Policy, Transform, Manifest, Pipeline
 ├── domains/          # Domain rules (medical, ocr, satellite, natural)
 ├── inspection/       # Dataset auto-detection & analysis
@@ -285,7 +302,10 @@ augmentai/
 ├── export/           # Script & folder generation
 ├── llm/              # LLM client and prompts
 ├── rules/            # Safety validation & enforcement
-└── compilers/        # Backend code generation
+├── compilers/        # Backend code generation
+├── search/           # 🆕 AutoSearch: evolutionary policy optimization
+├── utils/            # 🆕 Progress bars, logging utilities
+└── exceptions.py     # 🆕 Custom error hierarchy
 ```
 
 ## 🔧 Configuration
@@ -331,66 +351,6 @@ Load with:
 ```bash
 augmentai chat --domain-file my_domain.yaml
 ```
-
-## 🗺️ Extended Roadmap
-
-### Near Term (v0.2 – v0.3): Make AugmentAI Trustworthy at Scale
-
-*Focus: Data correctness & confidence*
-
-- [x] **Dataset Linter (Pre-Prepare)** ✅
-  - Detect duplicates, corrupt images, mismatched masks
-  - Warn about class imbalance and label leakage
-  - Runs automatically before prepare (`--skip-lint`, `--lint-only`)
-
-- [x] **Augmentation Safety Validator** ✅
-  - Test augmentation–label consistency
-  - Flag transforms that break segmentation masks or OCR legibility
-  - Critical for medical & OCR domains
-
-- [x] **Augmentation Preview & Diff** ✅
-  - Visual before/after samples
-  - Show what changed per transform
-  - HTML/JSON dry-run reports (`--preview`, `--preview-count`)
-
-
-### Mid Term (v0.4 – v0.5): Make AugmentAI Evidence-Driven
-
-*Focus: Prove augmentations help*
-
-- [x] **Automatic Augmentation Ablation** ✅
-  - Measure contribution of each transform
-  - Rank augmentations by validation impact
-  - Export ablation reports (`augmentai ablate`)
-
-- [x] **Augmentation-Aware Robustness Metrics** ✅
-  - Evaluate model sensitivity per augmentation
-  - Identify fragile invariances early
-
-- [x] **Policy Comparison & Versioning** ✅
-  - Diff augmentation policies
-  - Track changes across experiments
-  - Integrate with DVC / dataset manifests (`augmentai diff`)
-
-
-### Long Term (v0.6+): Close the Data–Model Loop
-
-*Focus: Data-centric learning*
-
-- [x] **Model-Guided Data Repair** ✅
-  - Use uncertainty to suggest relabel / reweight / remove samples
-  - Feedback loop from trained model to data prep
-  - CLI: `augmentai repair ./dataset --eval-script repair_eval.py`
-
-- [x] **Curriculum-Aware Dataset Preparation** ✅
-  - Order data from easy → hard
-  - Adaptive augmentation strength over epochs
-  - CLI: `augmentai curriculum ./dataset --epochs 100 --pacing quadratic`
-
-- [x] **Domain Shift Simulation** ✅
-  - Generate controlled distribution shifts
-  - Stress-test generalization before deployment
-  - CLI: `augmentai shift ./dataset --shifts brightness,blur,noise`
 
 ## 🤝 Contributing
 
