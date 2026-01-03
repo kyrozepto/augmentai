@@ -11,6 +11,7 @@ Provides commands for:
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -26,6 +27,13 @@ from augmentai.cli.diff import diff as diff_command
 from augmentai.cli.repair import repair as repair_command
 from augmentai.cli.curriculum import curriculum as curriculum_command
 from augmentai.cli.shift import shift as shift_command
+from augmentai.exceptions import AugmentAIError
+from augmentai.utils.progress import (
+    VerbosityLevel,
+    set_verbosity,
+    get_console,
+    print_error,
+)
 
 app = typer.Typer(
     name="augmentai",
@@ -34,6 +42,30 @@ app = typer.Typer(
 )
 console = Console()
 
+
+@app.callback()
+def main_callback(
+    verbose: bool = typer.Option(
+        False,
+        "--verbose", "-v",
+        help="Enable verbose output with detailed logging",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet", "-q", 
+        help="Minimal output (errors only)",
+    ),
+) -> None:
+    """AugmentAI: LLM-powered data augmentation policy designer."""
+    # Set verbosity level
+    if quiet:
+        set_verbosity(VerbosityLevel.QUIET)
+    elif verbose:
+        set_verbosity(VerbosityLevel.VERBOSE)
+    else:
+        set_verbosity(VerbosityLevel.NORMAL)
+
+
 # Register commands
 app.command()(prepare_command)
 app.command()(ablate_command)
@@ -41,7 +73,6 @@ app.command()(diff_command)
 app.command()(repair_command)
 app.command()(curriculum_command)
 app.command()(shift_command)
-
 
 
 @app.command()
@@ -335,8 +366,27 @@ Design domain-safe augmentation policies through natural conversation.
 
 
 def main() -> None:
-    """Main entry point."""
-    app()
+    """Main entry point with global error handling."""
+    try:
+        app()
+    except AugmentAIError as e:
+        # Handle our custom exceptions with nice formatting
+        print_error(str(e))
+        sys.exit(1)
+    except KeyboardInterrupt:
+        # Clean exit on Ctrl+C
+        get_console().print("\n[dim]Interrupted.[/dim]")
+        sys.exit(0)
+    except Exception as e:
+        # Unexpected errors - show stack trace in verbose mode
+        from augmentai.utils.progress import is_verbose
+        
+        if is_verbose():
+            get_console().print_exception()
+        else:
+            print_error(f"Unexpected error: {e}")
+            get_console().print("[dim]Run with --verbose for full traceback.[/dim]")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
