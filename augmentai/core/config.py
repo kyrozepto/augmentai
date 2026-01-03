@@ -26,8 +26,10 @@ class LLMProvider(str, Enum):
     """Supported LLM providers."""
     
     OPENAI = "openai"
+    GEMINI = "gemini"
     OLLAMA = "ollama"
     LMSTUDIO = "lmstudio"
+
 
 
 class AugmentationBackend(str, Enum):
@@ -54,6 +56,8 @@ class LLMConfig:
         if self.api_key is None:
             if self.provider == LLMProvider.OPENAI:
                 self.api_key = os.environ.get("OPENAI_API_KEY")
+            elif self.provider == LLMProvider.GEMINI:
+                self.api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
             # Ollama and LM Studio don't require API keys
         
         # Set default base URLs for local providers
@@ -62,6 +66,9 @@ class LLMConfig:
                 self.base_url = "http://localhost:11434/v1"
             elif self.provider == LLMProvider.LMSTUDIO:
                 self.base_url = "http://localhost:1234/v1"
+            elif self.provider == LLMProvider.GEMINI:
+                self.base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
 
 
 @dataclass

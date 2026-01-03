@@ -3,9 +3,11 @@ LLM client abstraction supporting multiple providers.
 
 Supports:
 - OpenAI API (GPT-4o-mini, GPT-4o, etc.)
+- Google Gemini API (gemini-2.0-flash, gemini-1.5-pro, etc.)
 - Ollama (local models)
 - LM Studio (local models with OpenAI-compatible API)
 """
+
 
 from __future__ import annotations
 
@@ -87,6 +89,18 @@ class LLMClient:
                 )
             self._client = OpenAI(api_key=self.config.api_key)
         
+        elif self.config.provider == LLMProvider.GEMINI:
+            if not self.config.api_key:
+                raise ValueError(
+                    "Google API key is required. Set GOOGLE_API_KEY or GEMINI_API_KEY "
+                    "environment variable or provide api_key in LLMConfig."
+                )
+            # Gemini uses OpenAI-compatible API
+            self._client = OpenAI(
+                api_key=self.config.api_key,
+                base_url=self.config.base_url or "https://generativelanguage.googleapis.com/v1beta/openai/",
+            )
+        
         elif self.config.provider == LLMProvider.OLLAMA:
             # Ollama uses OpenAI-compatible API
             self._client = OpenAI(
@@ -100,6 +114,7 @@ class LLMClient:
                 base_url=self.config.base_url or "http://localhost:1234/v1",
                 api_key="lm-studio",  # LM Studio doesn't need a real key
             )
+
     
     def chat(
         self,
@@ -216,9 +231,9 @@ class LLMClient:
         Create a client for a specific provider.
         
         Args:
-            provider: Provider name ("openai", "ollama", "lmstudio")
+            provider: Provider name ("openai", "gemini", "ollama", "lmstudio")
             model: Model name (defaults based on provider)
-            api_key: API key (only needed for OpenAI)
+            api_key: API key (needed for OpenAI and Gemini)
             base_url: Base URL for local providers
             
         Returns:
@@ -230,10 +245,13 @@ class LLMClient:
         if model is None:
             if provider_enum == LLMProvider.OPENAI:
                 model = "gpt-4o-mini"
+            elif provider_enum == LLMProvider.GEMINI:
+                model = "gemini-2.0-flash"
             elif provider_enum == LLMProvider.OLLAMA:
                 model = "llama3.2"
             elif provider_enum == LLMProvider.LMSTUDIO:
                 model = "local-model"
+
         
         config = LLMConfig(
             provider=provider_enum,
