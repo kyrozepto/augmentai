@@ -85,14 +85,20 @@ def chat(
         help="Domain for augmentation (medical, ocr, satellite, natural)",
     ),
     provider: str = typer.Option(
-        "openai",
+        None,
         "--provider", "-p",
-        help="LLM provider (openai, ollama, lmstudio)",
+        help="LLM provider (openai, gemini, ollama, lmstudio)",
     ),
     model: Optional[str] = typer.Option(
         None,
         "--model", "-m",
         help="LLM model name (defaults based on provider)",
+    ),
+    api_key: Optional[str] = typer.Option(
+        None,
+        "--api-key", "-k",
+        help="API key for the LLM provider (or set via env var)",
+        envvar=["OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY"],
     ),
     output: Optional[Path] = typer.Option(
         None,
@@ -104,24 +110,36 @@ def chat(
     from augmentai.cli.chat import ChatSession
     from augmentai.core.config import LLMConfig
     
+    # Auto-detect provider from available API keys if not specified
+    if provider is None:
+        import os
+        if api_key or os.environ.get("OPENAI_API_KEY"):
+            provider = "openai"
+        elif os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY"):
+            provider = "gemini"
+        else:
+            provider = "openai"  # Default fallback
+    
     # Configure LLM
     try:
         llm_provider = LLMProvider(provider.lower())
     except ValueError:
         console.print(f"[red]Unknown provider: {provider}[/red]")
-        console.print("Available: openai, ollama, lmstudio")
+        console.print("Available: openai, gemini, ollama, lmstudio")
         raise typer.Exit(1)
     
     # Set default models
     if model is None:
         if llm_provider == LLMProvider.OPENAI:
             model = "gpt-4o-mini"
+        elif llm_provider == LLMProvider.GEMINI:
+            model = "gemini-2.0-flash"
         elif llm_provider == LLMProvider.OLLAMA:
             model = "llama3.2"
         elif llm_provider == LLMProvider.LMSTUDIO:
             model = "local-model"
     
-    llm_config = LLMConfig(provider=llm_provider, model=model)
+    llm_config = LLMConfig(provider=llm_provider, model=model, api_key=api_key)
     
     config = AugmentAIConfig(
         llm=llm_config,

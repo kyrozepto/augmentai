@@ -9,6 +9,8 @@ Design domain-safe, task-aware augmentation policies through natural language co
 [![PyPI version](https://img.shields.io/pypi/v/augmentai.svg)](https://pypi.org/project/augmentai/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kyrozepto/augmentai/blob/main/notebooks/AugmentAI_Introduction.ipynb)
+
 
 ## 🌟 Features
 
@@ -18,7 +20,7 @@ Design domain-safe, task-aware augmentation policies through natural language co
 - **Domain-Aware Constraints**: Built-in rules for medical, OCR, satellite, and natural images
 - **Safety-First Design**: Hard constraints that prevent scientifically invalid augmentations
 - **Full Reproducibility**: Seed locking, manifest tracking, deterministic pipelines
-- **LLM as Advisor**: GPT-4o-mini, Ollama, or LM Studio—LLM suggests, rules validate
+- **LLM as Advisor**: OpenAI, Gemini, Ollama, or LM Studio—LLM suggests, rules validate
 - **Executable Output**: Generate standalone Python scripts ready to run
 - **Verbose/Quiet Modes**: `--verbose` for debugging, `--quiet` for CI/CD pipelines
 
@@ -38,12 +40,26 @@ cd augmentai && pip install -e .
 ### Set up your LLM provider
 
 ```bash
-# For OpenAI
-export OPENAI_API_KEY="your-api-key"
+# Option 1: Environment variables (recommended)
+export OPENAI_API_KEY="your-api-key"      # For OpenAI
+export GOOGLE_API_KEY="your-api-key"       # For Gemini (from aistudio.google.com)
 
-# Or use Ollama (free, local)
+# Option 2: Pass directly via CLI
+augmentai chat --provider gemini --api-key "your-key"
+augmentai chat --provider openai --api-key "your-key"
+
+# Option 3: Use Ollama (free, local)
 ollama pull llama3.2
+augmentai chat --provider ollama
 ```
+
+**Supported LLM Providers:**
+| Provider | Models | API Key Env Var |
+|----------|--------|-----------------|
+| `openai` | gpt-4o-mini, gpt-4o | `OPENAI_API_KEY` |
+| `gemini` | gemini-2.0-flash, gemini-1.5-pro | `GOOGLE_API_KEY` |
+| `ollama` | llama3.2, mistral, etc. | (none needed) |
+| `lmstudio` | local models | (none needed) |
 
 
 ### One-Command Dataset Preparation
