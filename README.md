@@ -6,6 +6,7 @@ Design domain-safe, task-aware augmentation policies through natural language co
 
 > **Design Philosophy**: The LLM suggests. Rules decide. Code executes.
 
+[![PyPI version](https://img.shields.io/pypi/v/augmentai.svg)](https://pypi.org/project/augmentai/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -26,15 +27,12 @@ Design domain-safe, task-aware augmentation policies through natural language co
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/kyrozepto/aai.git
-cd aai
+# Install from PyPI
+pip install augmentai
 
-# Install in development mode
-pip install -e .
-
-# Or install with all backends
-pip install -e ".[all]"
+# Or install from source
+git clone https://github.com/kyrozepto/augmentai.git
+cd augmentai && pip install -e .
 ```
 
 ### Set up your LLM provider
@@ -46,6 +44,7 @@ export OPENAI_API_KEY="your-api-key"
 # Or use Ollama (free, local)
 ollama pull llama3.2
 ```
+
 
 ### One-Command Dataset Preparation
 
