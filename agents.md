@@ -21,7 +21,10 @@ augmentai/
 ├── export/        # Script & folder generation
 ├── llm/           # LLM client (OpenAI, Ollama, LM Studio)
 ├── rules/         # Safety validator & constraint enforcer
-└── compilers/     # Export to Albumentations
+├── compilers/     # Export to Albumentations
+├── repair/        # Model-guided data repair (v0.6+)
+├── curriculum/    # Curriculum learning utilities (v0.6+)
+└── shift/         # Domain shift simulation (v0.6+)
 ```
 
 ## Key Commands
