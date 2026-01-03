@@ -27,6 +27,7 @@ from augmentai.cli.diff import diff as diff_command
 from augmentai.cli.repair import repair as repair_command
 from augmentai.cli.curriculum import curriculum as curriculum_command
 from augmentai.cli.shift import shift as shift_command
+from augmentai.cli.search import search as search_command
 from augmentai.exceptions import AugmentAIError
 from augmentai.utils.progress import (
     VerbosityLevel,
@@ -73,6 +74,7 @@ app.command()(diff_command)
 app.command()(repair_command)
 app.command()(curriculum_command)
 app.command()(shift_command)
+app.command()(search_command)
 
 
 @app.command()
