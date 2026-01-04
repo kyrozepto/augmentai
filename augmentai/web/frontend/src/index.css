@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* Base styles - AugmentAI Design System */
+* {
+    font-family: 'JetBrains Mono', monospace;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    image-rendering: pixelated;
+}
+
+body {
+    background-color: #D1D1D1;
+    color: #000;
+    min-height: 100vh;
+}
+
+/* Grid background pattern */
+.grid-bg {
+    background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 8px 8px;
+}
+
+/* Pixel-art style border */
+.pixel-border {
+    box-shadow:
+        4px 0 0 0 #000,
+        -4px 0 0 0 #000,
+        0 4px 0 0 #000,
+        0 -4px 0 0 #000;
+}
+
+/* Pixel text styling */
+.pixel-text {
+    text-shadow: none;
+    letter-spacing: 0.05em;
+}
+
+/* Hacker-style glow text */
+.glow-text {
+    text-shadow:
+        0 0 5px currentColor,
+        0 0 10px currentColor,
+        0 0 20px currentColor;
+}
+
+.glow-text-subtle {
+    text-shadow:
+        0 0 2px currentColor,
+        0 0 5px currentColor;
+}
+
+/* Pixel button base */
+.pixel-btn {
+    position: relative;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    letter-spacing: 0.1em;
+}
+
+.pixel-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 #000;
+}
+
+.pixel-btn:active {
+    transform: translate(0, 0);
+    box-shadow: none;
+}
+
+.pixel-btn-secondary {
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+}
+
+/* Animations */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+.blink {
+    animation: blink 1s step-end infinite;
+}
+
+/* Scanline effect */
+.scanlines::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Terminal section styling */
+.terminal-section {
+    background: #000;
+    color: #fff;
+}
+
+/* Label tag styling */
+.label-tag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 4px 8px;
+    border: 2px solid #000;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Card/Panel styling */
+.card {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid #000;
+    padding: 16px;
+}
+
+/* Sidebar navigation */
+.sidebar {
+    width: 200px;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 12px 16px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Focus visibility for accessibility */
+:focus-visible {
+    outline: 3px solid #000;
+    outline-offset: 3px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}

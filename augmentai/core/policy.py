@@ -58,13 +58,24 @@ class Transform:
     
     def to_dict(self) -> dict[str, Any]:
         """Convert transform to dictionary representation."""
+        # Convert any tuples to lists for YAML compatibility
+        def sanitize_params(obj: Any) -> Any:
+            if isinstance(obj, tuple):
+                return list(obj)
+            elif isinstance(obj, dict):
+                return {k: sanitize_params(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [sanitize_params(item) for item in obj]
+            return obj
+        
         return {
             "name": self.name,
             "probability": self.probability,
-            "parameters": self.parameters,
+            "parameters": sanitize_params(self.parameters),
             "category": self.category.value,
             "magnitude": self.magnitude,
         }
+
     
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Transform:

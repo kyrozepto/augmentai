@@ -1,6 +1,6 @@
 [project]
 name = "augmentai"
-version = "0.1.0"
+version = "0.1.2"
 description = "LLM-powered data augmentation policy designer with domain-safe, task-aware policies"
 readme = "README.md"
 license = {text = "MIT"}
@@ -38,7 +38,12 @@ dependencies = [
 [project.optional-dependencies]
 kornia = ["kornia>=0.7", "torch>=2.0"]
 torchvision = ["torchvision>=0.16", "torch>=2.0"]
-all = ["kornia>=0.7", "torchvision>=0.16", "torch>=2.0"]
+web = [
+    "fastapi>=0.109",
+    "uvicorn[standard]>=0.25",
+    "python-multipart>=0.0.6",
+]
+all = ["kornia>=0.7", "torchvision>=0.16", "torch>=2.0", "fastapi>=0.109", "uvicorn[standard]>=0.25"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
