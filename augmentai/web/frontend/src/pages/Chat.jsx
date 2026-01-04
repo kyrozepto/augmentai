@@ -1,5 +1,33 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import ReactMarkdown from 'react-markdown'
+
+// Custom code block component for syntax highlighting
+function CodeBlock({ inline, className, children, ...props }) {
+    const match = /language-(\w+)/.exec(className || '')
+    const language = match ? match[1] : ''
+
+    if (inline) {
+        return (
+            <code className="bg-gray-800 text-green-400 px-1 rounded text-xs" {...props}>
+                {children}
+            </code>
+        )
+    }
+
+    return (
+        <div className="relative my-2">
+            {language && (
+                <span className="absolute top-0 right-0 text-[10px] text-gray-400 px-2 py-1 bg-gray-900">
+                    {language.toUpperCase()}
+                </span>
+            )}
+            <pre className="bg-gray-900 text-green-400 p-3 overflow-x-auto rounded text-xs">
+                <code {...props}>{children}</code>
+            </pre>
+        </div>
+    )
+}
 
 function Chat() {
     const [messages, setMessages] = useState([])
@@ -77,6 +105,30 @@ function Chat() {
         }
     }
 
+    // Custom markdown components for styling
+    const markdownComponents = {
+        code: CodeBlock,
+        h1: ({ children }) => <h1 className="text-lg font-bold mt-3 mb-2">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-base font-bold mt-3 mb-2">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-sm font-bold mt-2 mb-1">{children}</h3>,
+        p: ({ children }) => <p className="mb-2">{children}</p>,
+        ul: ({ children }) => <ul className="list-disc list-inside mb-2 ml-2">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal list-inside mb-2 ml-2">{children}</ol>,
+        li: ({ children }) => <li className="mb-1">{children}</li>,
+        strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+        em: ({ children }) => <em className="italic">{children}</em>,
+        blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-gray-400 pl-3 my-2 italic opacity-80">
+                {children}
+            </blockquote>
+        ),
+        a: ({ href, children }) => (
+            <a href={href} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">
+                {children}
+            </a>
+        ),
+    }
+
     return (
         <div className="max-w-6xl mx-auto h-[calc(100vh-3rem)] flex flex-col">
             {/* Header */}
@@ -113,17 +165,19 @@ function Chat() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className={`p-3 ${msg.role === 'user'
-                                        ? 'bg-black text-white ml-8'
-                                        : msg.role === 'system'
-                                            ? 'bg-gray-200 text-gray-600 text-sm'
-                                            : 'bg-white/80 border-2 border-black mr-8'
+                                    ? 'bg-black text-white ml-8'
+                                    : msg.role === 'system'
+                                        ? 'bg-gray-200 text-gray-600 text-sm'
+                                        : 'bg-white/80 border-2 border-black mr-8'
                                     }`}
                             >
                                 <span className="text-[10px] tracking-widest block mb-1 opacity-50">
                                     {msg.role.toUpperCase()}
                                 </span>
-                                <div className="text-sm whitespace-pre-wrap">
-                                    {msg.content}
+                                <div className="text-sm markdown-content">
+                                    <ReactMarkdown components={markdownComponents}>
+                                        {msg.content}
+                                    </ReactMarkdown>
                                 </div>
                             </motion.div>
                         ))}
