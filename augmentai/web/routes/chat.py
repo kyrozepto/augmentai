@@ -163,18 +163,20 @@ async def _generate_response(session: ChatSession, user_input: str) -> dict:
 async def _llm_response(session: ChatSession, user_input: str) -> dict:
     """Generate response using actual LLM."""
     from augmentai.llm import LLMClient, Message
+    from augmentai.llm.client import MessageRole
     
     # Build conversation history
     messages = [
-        Message(role="system", content=SYSTEM_PROMPT),
+        Message(role=MessageRole.SYSTEM, content=SYSTEM_PROMPT),
     ]
     
     # Add conversation history (last 10 messages for context)
     for msg in session.messages[-10:]:
-        messages.append(Message(role=msg.role, content=msg.content))
+        role = MessageRole.USER if msg.role == "user" else MessageRole.ASSISTANT
+        messages.append(Message(role=role, content=msg.content))
     
     # Add current user message
-    messages.append(Message(role="user", content=user_input))
+    messages.append(Message(role=MessageRole.USER, content=user_input))
     
     # Create client and get response
     client = LLMClient()
