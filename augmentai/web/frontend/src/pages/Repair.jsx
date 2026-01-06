@@ -19,35 +19,64 @@ function Repair() {
         setLoading(false)
     }
 
-    const getActionColor = (action) => {
+    const getActionStyles = (action) => {
         switch (action) {
-            case 'relabel': return 'bg-red-200 border-red-600'
-            case 'review': return 'bg-yellow-200 border-yellow-600'
-            default: return 'bg-green-200 border-green-600'
+            case 'relabel': return { border: 'border-red-400/50', bg: 'bg-red-400/10', text: 'text-red-400/80' }
+            case 'review': return { border: 'border-yellow-400/50', bg: 'bg-yellow-400/10', text: 'text-yellow-400/80' }
+            default: return { border: 'border-green-400/50', bg: 'bg-green-400/10', text: 'text-green-400/80' }
         }
     }
 
     return (
         <div className="max-w-6xl mx-auto">
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-                <h1 className="text-2xl font-bold tracking-widest mb-2">DATA :: REPAIR</h1>
-                <p className="text-sm opacity-70">Identify and fix uncertain or mislabeled samples</p>
+            {/* Header */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+            >
+                <motion.div
+                    className="inline-block mb-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <span className="text-[10px] tracking-[0.2em] text-white/40 border border-white/20 px-3 py-1">
+                        REPAIR_MODULE
+                    </span>
+                </motion.div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mb-2">
+                    DATA :: REPAIR
+                </h1>
+                <p className="text-sm text-white/50">
+                    Identify and fix uncertain or mislabeled samples
+                </p>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card mb-6">
-                <div className="flex gap-4 items-end">
-                    <div className="flex-1">
-                        <label className="text-[10px] tracking-widest block mb-1">DATASET_PATH</label>
+            {/* Configuration */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="card mb-6"
+            >
+                <div className="flex flex-wrap gap-4 items-end">
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="text-[10px] tracking-wider text-white/40 block mb-2">
+                            DATASET_PATH
+                        </label>
                         <input
                             type="text"
                             value={config.dataset_path}
                             onChange={(e) => setConfig({ ...config, dataset_path: e.target.value })}
                             placeholder="./dataset"
-                            className="w-full bg-white/50 border-2 border-black px-3 py-2 text-sm"
+                            className="w-full"
                         />
                     </div>
-                    <div className="w-40">
-                        <label className="text-[10px] tracking-widest block mb-1">THRESHOLD: {config.confidence_threshold}</label>
+                    <div className="w-48">
+                        <label className="text-[10px] tracking-wider text-white/40 block mb-2">
+                            THRESHOLD: <span className="text-white/60">{config.confidence_threshold}</span>
+                        </label>
                         <input
                             type="range"
                             min="0.1"
@@ -58,37 +87,61 @@ function Repair() {
                             className="w-full"
                         />
                     </div>
-                    <button onClick={analyze} disabled={loading} className="pixel-btn">
-                        {loading ? '...' : 'ANALYZE'}
-                    </button>
+                    <motion.button
+                        onClick={analyze}
+                        disabled={loading || !config.dataset_path}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="pixel-btn"
+                    >
+                        {loading ? 'ANALYZING...' : 'ANALYZE →'}
+                    </motion.button>
                 </div>
             </motion.div>
 
+            {/* Results */}
             {result && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
-                    <div className="flex gap-4 mb-4">
-                        <span className="label-tag">📊 {result.total_samples} total</span>
-                        <span className="label-tag bg-yellow-200">⚠️ {result.uncertain_count} uncertain</span>
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="card"
+                >
+                    <div className="flex gap-3 mb-6">
+                        <span className="label-tag">
+                            <span className="text-white/40">◫</span> {result.total_samples} total
+                        </span>
+                        <span className="label-tag label-tag-warning">
+                            <span className="text-yellow-400/60">◆</span> {result.uncertain_count} uncertain
+                        </span>
                     </div>
+
                     <div className="space-y-2">
-                        {result.samples.map((s, i) => (
-                            <motion.div
-                                key={s.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                className={`border-l-4 p-3 flex justify-between items-center ${getActionColor(s.action)}`}
-                            >
-                                <div>
-                                    <span className="font-bold text-sm">{s.id}</span>
-                                    <span className="text-[10px] opacity-70 ml-2">{s.path}</span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <span className="text-sm">{(s.confidence * 100).toFixed(0)}%</span>
-                                    <span className="label-tag text-[9px]">{s.action.toUpperCase()}</span>
-                                </div>
-                            </motion.div>
-                        ))}
+                        {result.samples.map((s, i) => {
+                            const styles = getActionStyles(s.action)
+                            return (
+                                <motion.div
+                                    key={s.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    whileHover={{ x: 4 }}
+                                    className={`border-l-4 ${styles.border} ${styles.bg} p-4 flex justify-between items-center`}
+                                >
+                                    <div>
+                                        <span className="font-bold text-sm text-white">{s.id}</span>
+                                        <span className="text-[10px] text-white/40 ml-3 font-mono">{s.path}</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-sm text-white/60">
+                                            {(s.confidence * 100).toFixed(0)}%
+                                        </span>
+                                        <span className={`label-tag text-[9px] ${styles.text}`}>
+                                            {s.action.toUpperCase()}
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
                     </div>
                 </motion.div>
             )}
